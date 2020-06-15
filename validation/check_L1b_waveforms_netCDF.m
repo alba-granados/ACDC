@@ -1,0 +1,9 @@
+filename='CR2_SR_1_SRA____20160117T201923_20160117T202127_20170307T080406_isd.nc';
+[S3]=readanyNETCDF_V1(filename);
+figure;
+subplot(1,3,1);
+imagesc(double(S3.data.lat_l1b_echo_sar_ku)*1e-6,1:128,double(S3.data.i2q2_meas_ku_l1b_echo_sar_ku))
+subplot(1,3,2);
+plot(double(S3.data.lat_l1b_echo_sar_ku)*1e-6,((double(S3.data.waveform_scale_factor_l1b_echo_sar_ku))))
+subplot(1,3,3);
+imagesc(double(S3.data.lat_l1b_echo_sar_ku)*1e-6,1:128,((double(S3.data.waveform_scale_factor_l1b_echo_sar_ku)*ones(1,128)).'.*double(S3.data.i2q2_meas_ku_l1b_echo_sar_ku)))
