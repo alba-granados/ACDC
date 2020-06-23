@@ -78,6 +78,7 @@ end
 
 %% ----------------- CHECKING L1B WAVEFORM --------------------------------
 if ~any(~isnan(L1B.wfm_cor_i2q2_sar_ku))
+    fprintf('checking L1B waveform\n')
     flag_exit=-1;
     L1B.ACDC.waveform=NaN(1,N_samples*zp_fact_range_cnf);
     L1B.ACDC.range_index=NaN(1,N_samples*zp_fact_range_cnf);
@@ -92,6 +93,7 @@ end
 %% ----------------- INITIZALIZATION OF VARIABLES -------------------------
 %--------------------------------------------------------------------------
 %load in a structure of non fitting parameters
+fprintf('generating non-fitting parameteters...\n')
 nf_p=gen_nonfit_params_ACDC(L1BS,L1B);
 
 % ---------------- Stack + mask -------------------------------------------
@@ -122,7 +124,7 @@ switch cnf_p_ACDC.method_pre_fitting
         % Specular beam (look for the beam closest to zero-Doppler)
         [~,beam_specular_point]=min(L1BS.doppler_ang_surf(L1B.start_beam:L1B.stop_beam));
         start_beam=max(beam_specular_point(1)-cnf_p_ACDC.num_left_beams_est_cnf+1,1);
-        stop_beam=min(beam_specular_point(1)-cnf_p_ACDC.num_right_beams_est_cnf,L1B.N_beams_start_stop);
+        stop_beam=min(beam_specular_point(1)-cnf_p_ACDC.num_right_beams_est_cnf,L1B.N_beams_start_stop); % alba: shouldn't it be +?
         nf_p.Neff=stop_beam-start_beam+1;
         stack=stack(start_beam:stop_beam,:);
         stack_mask=stack_mask(start_beam:stop_beam,:);
@@ -144,11 +146,11 @@ end
 %--------------------------------------------------------------------------
 %Preliminary estimation 
 %if i_surf_stacked==1 || (mod(i_surf_stacked,cnf_p_ACDC.preliminary_est_surf_downsampling)==0)
-    
-[Hs_conv, epoch_conv, Pu_conv,corr_coef_conv, ~, nf_p, flag,ml_wav_conv,ml_wav_fitted_conv]  = stack_fitting(stack,stack_mask,looks,range_index,...
-    nf_p,cnf_p_ACDC,fit_params_ini_conv,i_surf_stacked,...
-    func_f0,func_f1);
-    
+
+fprintf('stack fitting...\n')
+[Hs_conv, epoch_conv, Pu_conv,corr_coef_conv, ~, nf_p, flag,ml_wav_conv,ml_wav_fitted_conv]  = stack_fitting(stack,stack_mask,looks,range_index, nf_p,cnf_p_ACDC,fit_params_ini_conv,i_surf_stacked, func_f0,func_f1);
+fprintf('Done.\n')
+
     if flag==-1
         flag_exit=flag;
         L1B.ACDC.waveform=NaN(1,N_samples*zp_fact_range_cnf);
@@ -211,7 +213,6 @@ end
                
     end
 %using the first estimate
-
 if i_surf_stacked~=1
     %use the previous estimates to feed the ACDC
     %epoch=epoch+fit_params_ini(4);    
@@ -235,6 +236,7 @@ end
 for i_iter=1:cnf_p_ACDC.num_iterations
     %% --------------- Amplitude Compensation ---------------------------------
     %--------------------------------------------------------------------------
+    fprintf('amplitude compensation...\n')
     [stack_ac,k,l,g]=amplitude_compensation(stack,looks,range_index,nf_p,cnf_p_ACDC,Hs,epoch);
     %k: includes already the epoch: range_index-epoch;
     
@@ -242,6 +244,7 @@ for i_iter=1:cnf_p_ACDC.num_iterations
     
     %% -------------- SMOOTHING OF THE STACK ----------------------------------    
     if cnf_p_ACDC.stack_smooth_active
+        fprintf('stack smoothing...\n')
         stack_ac_smooth=stack_ac;
         idx_rows_int=(any(stack_mask,2)); %avoid all-zeros or NaNs
         for i_beam=1:nf_p.Neff
@@ -268,6 +271,7 @@ for i_iter=1:cnf_p_ACDC.num_iterations
     % look_indexation_ref=looks(look_indexation_ref(1));
     look_indexation_ref=0.0;%min(looks);    
     
+    fprintf('dilation compensation...\n')
     [k_scaled]=dilation_compensation(k,g,nf_p,Hs,look_indexation_ref);
     %dilation_compensation(k,g,nf_p,SWH)
     %clear range_index;
@@ -276,6 +280,7 @@ for i_iter=1:cnf_p_ACDC.num_iterations
     %% --------------- Retracking ACDC waveform -------------------------------
     %--------------------------------------------------------------------------
     %fit_params_ini(4)
+    fprintf('retracking...\n')
     [waveform,k_ml_ACDC,estimates,flag,ml_wav_fitted_ACDC]=ACDC_retracking(stack_ac,k_scaled,nf_p,cnf_p_ACDC,[epoch,Hs,1.0,0.0],look_indexation_ref,i_surf_stacked,func_f0);
     if flag==-1
         L1B.ACDC.waveform=NaN(1,N_samples*zp_fact_range_cnf);
@@ -340,7 +345,7 @@ end
 %% --------------- UPDATING THE INITIAL_PARAMS ----------------------------
 %--------------------------------------------------------------------------
 if cnf_p_ACDC.initial_param_fit_feedback_flag
-    
+    fprintf('updating initial parameters...\n')
     % conventional 
     % Amplitude fitting
     fit_params_ini_conv(3) = 1; 
@@ -453,9 +458,9 @@ if cnf_p_ACDC.initial_param_fit_feedback_flag
     end
 end
 
-
 %------------------- verbose ----------------------------------------------
 if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsampling)==0) || i_surf_stacked==1)
+    fprintf('plotting results...\n')
     resultPath=files.resultPath;
     switch mission
         case 'CR2'
@@ -463,6 +468,8 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
             if optional_ext_file_flag
                 filename=strcat(filename,file_ext_string);
             end
+        case {'S3_','S3'}
+            filename = strcat('measurement_l1a_', num2str(i_surf_stacked)); % files.xfdumanifest 
     end
     max_image=max([max(10*log10(stack_before_SRC(:))),max(10*log10(stack(:))),max(10*log10(stack_ac(:)))]);
     f1=figure('NumberTitle','off','Name','Comparison Stack before and after ACDC');
@@ -470,8 +477,8 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
     subplot(2,2,1);
     surfc(k,l,10*log10(stack_before_SRC),'LineStyle','none','FaceColor','flat');
     title('Stack before SRC'); xlabel('Range index'); ylabel('Doppler index');
-    colormap('jet'); c=colorbar; ylabel(c,'[dB]'); caxis([max_image-40.0, max_image]); view(2); grid off;
-    
+    colormap('jet'); c=colorbar; ylabel(c,'[dB]'); view(2); grid off;
+    caxis([max_image-40.0, max_image]); 
     subplot(2,2,2);
     surfc(k,l,10*log10(stack),'LineStyle','none','FaceColor','flat');
     title('Stack after SRC'); xlabel('Range index'); ylabel('Doppler index');
@@ -493,7 +500,7 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
     colormap('jet'); c=colorbar; ylabel(c,'[dB]'); caxis([max_image-40.0, max_image]); view(2); grid off;
     file_name=[resultPath,'plots/',filename,'_stack_comparison_',num2str(i_surf_stacked)];
 %    savefig(f1,[file_name,'.fig'])%
-    print('-dpng ',[file_name,'.png']);    
+    print('-dpng ','-r0',[file_name,'.png']);    
     close(f1)
    
     f1=figure('NumberTitle','off','Name','Conventional Retracker fitting');        
@@ -511,7 +518,7 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
         'BackgroundColor',[1 1 1]);
     file_name=[resultPath,'plots/',filename,'_conventional_fitting_',num2str(i_surf_stacked)];
     %savefig(f1,[file_name,'.fig'])%
-    print('-dpng ',[file_name,'.png']);
+    print('-dpng ','-r0',[file_name,'.png']);
     close(f1);
     
     f1=figure('NumberTitle','off','Name','ACDC Retracker fitting');        
@@ -529,7 +536,7 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
         'BackgroundColor',[1 1 1]);
     file_name=[resultPath,'plots/',filename,'_ACDC_fitting_',num2str(i_surf_stacked)];
     %savefig(f1,[file_name,'.fig'])%
-    print('-dpng ',[file_name,'.png']);
+    print('-dpng ','-r0',[file_name,'.png']);
     close(f1);
     
 end

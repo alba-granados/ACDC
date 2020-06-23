@@ -7,7 +7,7 @@ function nf_p = gen_nonfit_params_ACDC (L1BS,L1B)
 % 
 % Author:           Eduard Makhoul / isardSAT
 %
-% Reviewer:         Mònica Roca / isardSAT
+% Reviewer:         Mï¿½nica Roca / isardSAT
 %
 % Last revision:    Eduard Makhoul / isardSAT v1 29/09/2016
 %
@@ -80,8 +80,13 @@ switch mission
         nf_p.xp      =   L1BS.alt_sat.*(-1.0*L1BS.pitch_surf);
         %roll-angle is defined as positive/negative antenna right down/up        
         nf_p.yp      =   L1BS.alt_sat.*(1.0*L1BS.roll_surf);
-    case {'S3','S3_'}
+    case {'S3','S3_'}  % alba: I followed SAR altimeter analytical open ocean conventional retracker/algorithms/gen_nonfit_params_EM.m
         %TBD
+        %pitch is defined as positive/negative nose up/down respectively (clockwise w.r.t Y-axis looking from origin )
+        nf_p.xp      =   L1BS.alt_sat.*(1.0*L1BS.pitch_surf);
+        %roll-angle is defined as positive/negative satellite-right-side
+        %down/up (clockwise angle w.r.t x-axis looking from origin)
+        nf_p.yp      =   L1BS.alt_sat.*(1.0*L1BS.roll_surf);
     case {'S6','S6_'}
         % Satellite-frame coordinates: x-along-track, z direction
         % to nadir and positive y on right-side of satellite

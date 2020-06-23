@@ -1021,7 +1021,6 @@ if ACDC_application_cnf
       
 end
 
-
 %----------  Global Attributes definition -----------------------------------
 %---- attributes inherited from Sentinel-3 product description-------------
 id_aux = netcdf.getConstant('NC_GLOBAL');
@@ -1029,7 +1028,9 @@ netcdf.putAtt(ncid,id_aux,'creation_time',date_creation);
 netcdf.putAtt(ncid,id_aux,'Conventions',netcdf_v4_format);
 netcdf.putAtt(ncid,id_aux,'mission_name',mission);
 netcdf.putAtt(ncid,id_aux,'altimeter_sensor_name',altimeter_sensor_name);
+disp('innn')
 netcdf.putAtt(ncid,id_aux,'gnss_sensor_name',gnss_sensor_name);
+disp('innn')
 netcdf.putAtt(ncid,id_aux,'doris_sensor_name',doris_sensor_name);
 netcdf.putAtt(ncid,id_aux,'acq_station_name',acq_station_name);
 netcdf.putAtt(ncid,id_aux,'doris_sensor_name',acq_station_name);

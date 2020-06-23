@@ -13,7 +13,7 @@
 % 
 % ----------------------------------------------------------
 % Author:    Eduard Makhoul  / isardSAT
-%            Roger Escolà / isardSAT
+%            Roger Escolï¿½ / isardSAT
 %            Albert Garcia / isardSAT
 % Reviewer:  Monica Roca   / isardSAT
 % Last rev.: Monica Roca   / isardSAT (02/06/2015)
@@ -106,6 +106,7 @@ nf_p.Doppler_mask=stack_mask;
 if cnf_p_ACDC.pre_processing
     %used to estimate the initial value of the epoch 
     %& eventually if desired the noise floor
+    fprintf('estimating initial value of the epoch...\n')
     [peak_pow,idx_max_peak]=max(fit_data);
     idx_leading_edge=find(find(fit_data<=cnf_p_ACDC.percent_leading_edge/100.0*peak_pow)<idx_max_peak, 1, 'last' );
     if isempty(idx_leading_edge)
@@ -118,6 +119,7 @@ if cnf_p_ACDC.pre_processing
     
     %noise floor estimation
     if cnf_p_ACDC.fit_noise
+        fprintf('estimating thermal noise...\n')
         switch cnf_p_ACDC.Thn_method
             case 'ML'
                 idx_noise=[];
@@ -175,6 +177,7 @@ end
 % --------- DEFINE FITTING FUNCTION MODEL ---------------------
 % -------------------------------------------------------------
 if cnf_p_ACDC.lut_flag
+    fprintf('defining fitting fuctions model...\n')
     switch cnf_p_ACDC.power_wfm_model
         case 'simple'
             switch cnf_p_ACDC.fitting_fun_type
@@ -206,6 +209,7 @@ end
 % -------------------------------------------------------------------------
 switch cnf_p_ACDC.fitting_fun_type
     case 'lsq'
+        fprintf('running minimization %s procedure...\n', cnf_p_ACDC.fitting_fun_type);
         [fit_params,~,~,flag]     =   lsqcurvefit (mpfun,fit_params_ini,range_index,fit_data,...
                                                    cnf_p_ACDC.fitting_options_lb,cnf_p_ACDC.fitting_options_ub,cnf_p_ACDC.fitting_options);
     case 'fmin'

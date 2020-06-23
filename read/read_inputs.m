@@ -24,7 +24,6 @@ function [steps,meteo,files,first_burst,final_burst] = read_inputs(files)
 global mode level mission product_coord
 
 steps = [1,1,1,0];
-
 % steps for the processor
 % steps(1) -> L0    to L1A
 % steps(2) -> L1A   to L1B-S
@@ -123,10 +122,9 @@ iConSize = iConSize(1);
         end
     end
 %end
-
-
 %% 1.  UNPACKING & DECODING INPUTS
-if (strcmp(mission,'S3_')==1||strcmp(mission,'S3')==1)   
+
+if (strcmp(mission,'S3_')==1||strcmp(mission,'S3')==1)  % why? 
     run([files.configDir files.filename_CST.name]);
     run([files.configDir files.filename_CHD.name]);
     run([files.configDir files.filename_CNF.name]);
@@ -135,7 +133,7 @@ else
     run([files.inputPath files.filename_CST]);
     run([files.inputPath files.filename_CHD]);
     run([files.inputPath files.filename_CNF]);
-    run([files.inputPath files.filename_SPW]);
+    run([files.inputPath files.filename_SPW]); 
 end
     global mask_flag
     global N_bursts_cycle_chd N_bursts_cycle_sar_chd N_bursts_cycle_sarin_chd N_ku_pulses_burst_chd
@@ -147,7 +145,9 @@ end
     global gain_scale_win_rg_SAR gain_scale_win_rg_SARin gain_scale_win_rg
     global onboard_proc_sar_chd
     global bw_ku_chd pulse_length_chd
-  
+  % alba: added antenna_beamwidth from chd_file to be used in nf_p.alphax (gen_nonfit_params_EM.m) to compute Bkl (stack_gen.m) 
+    global antenna_beamwidth_ku_chd antenna_gain_ku_chd
+    global antenna_beamwidth_alt_ku_chd antenna_beamwidth_act_ku_chd
     
     switch mode
         case 'SAR'
@@ -261,6 +261,7 @@ end
                             end
 						end
                     else
+                        
                         if(files.options.plotting_flag(3) || files.options.writting_flag(4))
                            [lat,lon,alt,range_delay] = readnetCDF_Sentinel3_lat_lon(files.filename_L1A);
                             alt_surf= alt - range_delay; 
@@ -326,10 +327,11 @@ end
                 
             end
             if(files.options.writting_flag(4))
+                disp('l1a2kml...')
                 lla2kml(files.filename_L1A,lat,lon,alt_surf,'.');
+                disp('Done l1a2kml.')
                 movefile([files.filename_L1A '.kml'],files.resultPath);
             end
     end
 
 end
-

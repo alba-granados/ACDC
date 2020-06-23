@@ -1,4 +1,3 @@
-
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % --------------------------------------------------------
 % Created by isardSAT Ltd.
@@ -9,6 +8,7 @@
 % CryoSat-2 SAR
 % Sentinel 6 RAW
 % Sentinel 6 RMC
+%
 %
 % ---------------------------------------------------------
 % Inputs:
@@ -46,7 +46,7 @@ exit_gpp = 0;
 global extend_window_cnf include_wfms_aligned N_ku_pulses_burst_chd
 global N_bursts_cycle_chd mission
 global optional_ext_file_flag file_ext_string
-optional_ext_file_flag=0;
+optional_ext_file_flag=0; % alba: "Flag indicating whether to include or not a given extension to the output product name of file"
 file_ext_string='_height_rate';
 
 %EM: added 03.10.2016
@@ -64,7 +64,7 @@ t6 = tic;
 % including all other files (cnf,cst,chd,....) not DBL nor HDR related to the specific
 % folder (in order no to change the functions)
 files.inputPath =filesBulk.inputPath;
-files.configPath=dir('../config/');
+files.configPath=dir('../config/'); % why? I added this folder with cnf, cst, chd files
 files.configDir =('../config/');
 files.resultPath =filesBulk.resultPath;
 files.inputFiles =filesBulk.inputFiles(~(filesBulk.filterDATAFILES));
@@ -104,9 +104,11 @@ burst_indexes_in_memory = 1: N_bursts;
 N_surfs_loc_estimated = floor(N_bursts/N_bursts_cycle_chd*2.0);
 disp(strcat('# Estimated surfaces',{' '},num2str(N_surfs_loc_estimated)))
 if(options.writting_flag(2))
+    disp('creating NetCDF_L1B_S3 in output folder...')
     [files] = create_NetCDF_L1B_S3(files,N_surfs_loc_estimated);
 end
 if(options.writting_flag(1))
+    disp('creating NetCDF_L1BS_S3 in output folder...')
     [files] = create_NetCDF_L1BS_S3(files,N_surfs_loc_estimated);
 end
 [L1A]           = create_L1A_struct;
@@ -114,17 +116,21 @@ end
 [L1BS_buffer]   = create_L1BS_struct;
 L1B             = [];
 
+% i_burst=1;
+load(strcat(files.resultPath,'/data/up_to_i_surf96.mat'))
+[steps,meteo,files,first_burst,final_burst] = read_inputs(files);
 
-
-i_burst=1;
 N_bursts_original=N_bursts;
+fprintf('N_bursts=%d\n', N_bursts_original)
 while(i_burst<=N_bursts)
+    fprintf('\ni_burst=%d\n', i_burst)
     if((floor(i_burst/N_bursts*100))>(floor((i_burst-1)/N_bursts*100)))
         %             fprintf(filesBulk.fid_log,'%s\n' ,['L1A record ' num2str(i_burst) ' of  ' num2str(N_bursts) ': ' num2str(floor(i_burst/N_bursts*100)) '%']);
     end
     %progressbar(i_burst/N_bursts,[],[],[]);
     %% BURST Processor
     if (steps(1))
+        fprintf('L0 to L1A processing (step(1)=1)...\n')
         [ISP]  = read_ISP_record(files,first_burst,original_burst_index(i_burst),N_bursts); %To be build
         [L1A]  = pre_datation    (ISP);
         [L1A]  = pre_win_delay   (L1A,ISP);
@@ -133,7 +139,7 @@ while(i_burst<=N_bursts)
         [L1A]  = instrument_gain_corr   (ISP,L1A);
         [L1A]  = waveforms_correction   (ISP,L1A);
     else
-        
+        fprintf('Reading L1A input files (skip L0 to L1A processing)...\n')
         [L1A,files]  = read_L1A_record(files,L1A,original_burst_index(i_burst),i_burst,N_bursts);
         if(i_burst > 1)
             %if there is are missing burst records in the L1A file, jumps
@@ -160,6 +166,8 @@ while(i_burst<=N_bursts)
     
     
     if(steps(2))
+        fprintf('Step(2) L1A to L1BS processing...\n')
+        fprintf('Computing surface locations...\n')
         [L1BS_buffer, out_surf] = surface_locations (L1A_buffer,L1BS_buffer, i_burst, i_surf);
         if(i_surf < out_surf)
             %progressbar([],i_surf/N_bursts/zp_fact_azimut_cnf*N_bursts_cycle_chd,[],[]);
@@ -173,20 +181,25 @@ while(i_burst<=N_bursts)
             end
         end
         
-        if(i_surf > 64)
-            
+%         i_surf = 96;
+        fprintf('i_surf=%d\n', i_surf)
+%         load(strcat(files.resultPath,'/data/up_to_i_surf96.mat'))
+        if(i_surf > 64) %  > SAR Ku pulses in burst (number of surface location that are “observed” by the satellite at the current satellite burst position)
             if(i_burst_focussed==1)% handle final bursts
                 burst_margin = i_burst;
             end
+            fprintf('beam angles computation and azimuth processing...\n')
             %progressbar([],[],i_burst_focussed/N_bursts,[]);
-            
             [L1A_buffer(i_burst_focussed)]      = beam_angles (L1A_buffer(i_burst_focussed),   L1BS_buffer, N_total_surf_loc,i_surf_stacked);
-            [L1A_buffer(i_burst_focussed)]      = azimuth_processing    (L1A_buffer(i_burst_focussed));
-            
+            [L1A_buffer(i_burst_focussed)]      = azimuth_processing(L1A_buffer(i_burst_focussed));
             i_burst_focussed = i_burst_focussed+1;
             
-            
+            fprintf('L1A_buffer(i_burst_focussed-1).surf_loc_index(1)=%d\n', L1A_buffer(i_burst_focussed-1).surf_loc_index(1))
+            fprintf('i_burst_focussed=%d\n', i_burst_focussed)
+            fprintf('i_surf_stacked=%d\n', i_surf_stacked)
             if(L1A_buffer(i_burst_focussed-1).surf_loc_index(1)~=i_surf_stacked)
+%                 save(strcat(files.resultPath,'/data/up_to_i_surf96_2.mat'));
+                fprintf('stacking, geometry corrections, range transformation, stack masking...\n')
                 %             if(i_burst_focussed > (N_bursts_cycle_chd*N_ku_pulses_burst_chd))
                 %progressbar([],[],[],i_surf_stacked/N_bursts/zp_fact_azimut_cnf*N_bursts_cycle_chd);
                     [L1BS_buffer(i_surf_stacked)]       = stacking              (L1A_buffer,L1BS_buffer(i_surf_stacked));
@@ -202,10 +215,14 @@ while(i_burst<=N_bursts)
                     exit_gpp=1;
                     break;
                 end
+                fprintf('step(3) L1BS to L1B processing...\n')
+                disp('filesid in L1B_processing'); disp(files.fid)
+                fprintf('Multi-looking...\n')
                 [L1BS_buffer(i_surf_stacked),L1B]   = multilooking          (L1BS_buffer(i_surf_stacked));
                 if include_wfms_aligned
                     %surface alignment using window delay reference of first
                     %surface
+                    fprintf('Perform surface alignment using window delay reference of first surface...\n')
                     if i_surf_stacked== 1
                         %reference surface
                         win_delay_surf_ref=L1BS_buffer(i_surf_stacked).win_delay_surf;
@@ -213,6 +230,7 @@ while(i_burst<=N_bursts)
                     end
                     [L1BS_buffer(i_surf_stacked),L1B]   = surface_win_delay_alignment (L1BS_buffer(i_surf_stacked),L1B,win_delay_surf_ref,alt_sat_ref);
                 end
+                fprintf('Sigma-0 scaling factor...\n')
                 [L1BS_buffer(i_surf_stacked),L1B]   = sigma0_scaling_factor (L1A_buffer,L1BS_buffer(i_surf_stacked),L1B);
                 
                 %plot track in the GUI
@@ -237,16 +255,20 @@ while(i_burst<=N_bursts)
                 %added EM: 30.10.2016
                 %% ---------------- ACDC APPLICATION ----------------------
                 if ACDC_application_cnf
+                    fprintf('ACDC processing...\n')
                     if i_surf_stacked==1
                         %% ----------------- FITTING PARAMS INITIALIZE ----------------------------
                         %--------------------------------------------------------------------------
+                        fprintf('i_surf_stacked=1, initializing fitting parameters...\n')
                         if cnf_p_ACDC.rou_flag
+                            fprintf('(MSS fitting)\n')
                             if strcmp(cnf_p_ACDC.multilook_option,'Cris_old')
                                 fit_params_ini_conv      =   [cnf_p_ACDC.ini_Epoch cnf_p_ACDC.ini_rou cnf_p_ACDC.ini_Pu];
                             else
                                 fit_params_ini_conv      =   [cnf_p_ACDC.ini_Epoch cnf_p_ACDC.ini_rou];
                             end
                         else
+                            fprintf('(SWH fitting)\n')
                             if strcmp(cnf_p_ACDC.multilook_option,'Cris_old')
                                 fit_params_ini_conv      =   [cnf_p_ACDC.ini_Epoch cnf_p_ACDC.ini_Hs/4 cnf_p_ACDC.ini_Pu];
                             else
@@ -274,6 +296,7 @@ while(i_burst<=N_bursts)
                         %% ----------------- LOAD THE LUTs FUNC_F0/F1 ------------------------------
                         %--------------------------------------------------------------------------
                         if (cnf_p_ACDC.lut_flag)
+                            fprintf('Loading LUTs functions f0 and f1...\n')
                             %-------------- load func_f0 --------------------------------------
                             load('./inputs/LUT_f0.mat','func_f0')
                             switch cnf_p_ACDC.power_wfm_model
@@ -288,6 +311,7 @@ while(i_burst<=N_bursts)
                         geo_param_buffer_conv=[];
                         geo_param_buffer_ACDC=[];
                     end
+                    fprintf('ACDC stack processing...\n')
                     [L1B,geo_param_buffer_conv,geo_param_buffer_ACDC,fit_params_ini_conv,fit_params_ini_ACDC,accumulated_sigmaz_conv,accumulated_SWH_ACDC,accumulated_SSH_ACDC,i_surf_fitted,flag_exit]  = ACDC_stack_bis (L1A_buffer,L1BS_buffer(i_surf_stacked),L1B,...
                         range_index,delta_range,i_surf_stacked,...
                         geo_param_buffer_conv,geo_param_buffer_ACDC,fit_params_ini_conv,fit_params_ini_ACDC,...
@@ -339,6 +363,7 @@ end
 last_burst=i_burst_focussed;
 % Last bursts and stacks
 if(~exit_gpp)
+    fprintf('Processing last bursts and stacks...\n')
     for i_burst_focussed = last_burst:N_bursts
         %progressbar([],[],i_burst_focussed/N_bursts,[]);
         [L1A_buffer(i_burst_focussed)]      = beam_angles (L1A_buffer(i_burst_focussed),   L1BS_buffer, N_total_surf_loc,i_surf_stacked);

@@ -38,7 +38,7 @@ clear global
 warning('off','MATLAB:MKDIR:DirectoryExists');
 warning('off','MATLAB:DELETE:FileNotFound');
 if(nargin < 6)
-    options.writting_flag = [0 0 0 1]; % L1BS, L1B, pLRM, KML
+    options.writting_flag = [0 0 0 0]; % L1BS, L1B, pLRM, KML
     options.plotting_flag = [0 0 0]; % Stacks, L1B waveforms, track
     options.axes = [];
     options.wd_axes = [];

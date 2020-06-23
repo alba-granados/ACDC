@@ -1,6 +1,6 @@
 function [product_mask] = plot_track(lat,lon,alt,options,product_mask)
 global mask_flag
-
+    
     WaterColor = [143 226 255]/255;
     degrees=max(lat)-min(lat);
     axes(options.axes)

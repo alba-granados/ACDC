@@ -42,7 +42,6 @@ function [L1A] = azimuth_processing (L1A)
     global sigma_alt_surf_th_cnf force_exact_method_cnf
     global pi_cst hamming_window_cnf zp_fact_azimut_cnf hamm_win
     
-    
     % Pre-allocating memory                                              
     wfm_cal_corrected_azw   = zeros (N_ku_pulses_burst_chd, N_samples);                                              
     wfm_beams_focused       = zeros (N_ku_pulses_burst_chd*zp_fact_azimut_cnf, N_samples);
@@ -125,7 +124,7 @@ function [L1A] = azimuth_processing (L1A)
                 if(hamming_window_cnf)
                     % Hamming
                     
-                    (:,:) = wfm_pulses_received_shifted(:,:) .* (hamm_win * ones(1,N_samples));
+                    % (:,:) = wfm_pulses_received_shifted(:,:) .* (hamm_win * ones(1,N_samples));
 
                 end
                 % FFT

@@ -43,10 +43,10 @@ global mode  mission
 
 
 switch mission
-    case 'S3_'
-        if i_burst==1
+    case {'S3_', 'S3'}
+%         if i_burst==1
             files.fid = netcdf.open(files.filename_L1A,'NC_NOWRITE'); %open file
-        end
+%         end
         [netCDF_L1A] = readanyNETCDF_record(files.fid,original_burst);
         [L1A]        = adapt_netCDF2internal(netCDF_L1A,files.filename_L1A,original_burst);
         if i_burst==N_bursts
