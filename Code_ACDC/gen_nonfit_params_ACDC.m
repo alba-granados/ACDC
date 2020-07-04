@@ -38,6 +38,7 @@ global semi_major_axis_cst semi_minor_axis_cst
 global antenna_beamwidth_alt_ku_chd antenna_beamwidth_act_ku_chd
 global freq_ku_chd hamming_window_cnf window_rg_cnf
 global N_ku_pulses_sar_chd N_bursts_cycle_chd bw_ku_chd N_samples
+global window_type_a_cnf window_type_r_cnf % alba: added, see cnf_file and CR code
 
 %-------------------- Configuration of retracker ACDC ---------------------
 global mission cnf_p_ACDC
@@ -105,12 +106,17 @@ nf_p.alphay  =   (8*log(2))./(L1BS.alt_sat.*antenna_beamwidth_act_ku_chd).^2; %8
 %% --------------- Sampling spacing ---------------------------------------
 % along-track
 nf_p.Lx      =   c_cst*L1BS.alt_sat./(2*nf_p.v_sat.*freq_ku_chd*N_ku_pulses_sar_chd.*nf_p.pri_surf);
-% across-track
-%nf_p.Ly      =   sqrt(c_cst*data.GEO.H./(alpha*bw_rx_ku_chd*cnf_p.ZP));
-nf_p.Ly      =   sqrt(c_cst*L1BS.alt_sat./(alpha*bw_ku_chd));
-% vertical
-%nf_p.Lz      =   0.5*c_cst/(bw_rx_ku_chd*cnf_p.ZP);
-nf_p.Lz      =   0.5*c_cst/(bw_ku_chd);
+
+% across-track & vertical 
+switch cnf_p_ACDC.range_index_method
+        case 'conventional'
+            nf_p.Ly      =   sqrt(c_cst*data.GEO.H./(alpha*bw_rx_ku_chd*cnf_p.ZP));
+            nf_p.Lz      =   0.5*c_cst/(bw_rx_ku_chd*cnf_p.ZP);
+            
+        case 'resampling'           
+            nf_p.Ly      =   sqrt(c_cst*L1BS.alt_sat./(alpha*bw_ku_chd));
+            nf_p.Lz      =   0.5*c_cst/(bw_ku_chd);
+end
 
 %nf_p.oversampling=fs_clock_ku_chd/bw_ku_chd; %due to differences in BW and fs (like in Sentinel-6)
 
@@ -124,25 +130,62 @@ nf_p.Neff=L1B.N_beams_start_stop;
 
 
 %% ------------------- PTR gaussian approximation -------------------------
-%first approach assuming no hamming in range: boxcar (to be updated)
-if window_rg_cnf
-    A_s2Gr_chd=1.0101;
-    alpha_gr_chd=1.0/(2*(0.59824).^2);  
-    %alpha_gr_chd=1.0/(2*(0.5408).^2);  
-else
-    A_s2Gr_chd=1.0196;
-    alpha_gr_chd=1.0/(2*(0.36012).^2);    
+% %first approach assuming no hamming in range: boxcar (to be updated)
+% if window_rg_cnf
+%     A_s2Gr_chd=1.0101;
+%     alpha_gr_chd=1.0/(2*(0.59824).^2);  
+%     %alpha_gr_chd=1.0/(2*(0.5408).^2);  
+% else
+%     A_s2Gr_chd=1.0196;
+%     alpha_gr_chd=1.0/(2*(0.36012).^2);    
+% end
+% 
+% % if applied right now only on azimuth
+% if hamming_window_cnf
+%     A_s2Ga_chd=1.0101;
+%     alpha_ga_chd=1.0/(2*(0.59824).^2);    % this is a hanning!
+%     %alpha_ga_chd=1.0/(2*(0.5408).^2);    % this is a hamming!
+% else % boxcar
+%     A_s2Ga_chd=1.0196;
+%     alpha_ga_chd=1.0/(2*(0.36012).^2);
+% end
+
+switch window_type_a_cnf
+    case 'Boxcar'  % the Gaussian approximation for a boxcar window filtered waveform previous to FFT
+        A_s2Ga_chd=1.0196;
+        alpha_ga_chd=1.0/(2*(0.36012).^2);
+    case 'Hanning'  
+        A_s2Ga_chd=1.0101; 
+        alpha_ga_chd=1.0/(2*(0.59824).^2);
+    case 'Hamming' 
+        A_s2Ga_chd=1.0081;
+        alpha_ga_chd=1.0/(2.0*(0.54351).^2);  
+    case 'Forced' 
+        A_s2Ga_chd=1; 
+        alpha_ga_chd=1.0/(2.0*(0.596755).^2); 
+    otherwise
+        A_s2Ga_chd=[];
+        alpha_ga_chd=[];
 end
 
-% if applied right now only on azimuth
-if hamming_window_cnf
-    A_s2Ga_chd=1.0101;
-    alpha_ga_chd=1.0/(2*(0.59824).^2);    
-    %alpha_ga_chd=1.0/(2*(0.5408).^2);    
-else
-    A_s2Ga_chd=1.0196;
-    alpha_ga_chd=1.0/(2*(0.36012).^2);
+switch window_type_r_cnf
+    case 'Boxcar'  
+        A_s2Gr_chd=1.0196;
+        alpha_gr_chd=1.0/(2*(0.36012).^2);
+    case 'Hanning'  
+        A_s2Gr_chd=1.0101;
+        alpha_gr_chd=1.0/(2*(0.59824).^2);
+    case 'Hamming' 
+        A_s2Gr_chd=1.0081;
+        alpha_gr_chd=1.0/(2.0*(0.54351).^2);
+    case 'Forced'
+        A_s2Gr_chd=1;
+        alpha_gr_chd=1.0/(2.0*(0.596755).^2); 
+    otherwise
+        A_s2Gr_chd=[];
+        alpha_gr_chd=[];
 end
+
 
 %% ------------------- Constant Values ------------------------------------
 nf_p.Npulses    =   N_ku_pulses_sar_chd;

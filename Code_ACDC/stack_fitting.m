@@ -72,7 +72,7 @@ flag_exit=0;
 %multilooked waveform
 % If we perform the fitting over only one waveform is highly affected by
 % speckle
-if avoid_beams_mask_allzeros_cnf
+if avoid_beams_mask_allzeros_cnf % alba: is this already computed in multilooking.m, see L1B.start_beam, .stop_beam?
     %mask: beams where all the samples are set to 0 are non-contributing to the
     %ML
     idx_rows_int=any(stack_mask,2);
