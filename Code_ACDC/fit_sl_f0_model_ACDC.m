@@ -11,7 +11,7 @@
 % 
 % ----------------------------------------------------------
 % Author:    Eduard Makhoul  / isardSAT
-%            Roger Escolà / isardSAT
+%            Roger Escolï¿½ / isardSAT
 %            Albert Garcia / isardSAT
 % Reviewer:  Monica Roca   / isardSAT
 % Last rev.: Monica Roca   / isardSAT (02/06/2015)
@@ -129,7 +129,6 @@ end
 % --------- DEFINE FITTING FUNCTION MODEL ---------------------
 % -------------------------------------------------------------
 %[waveform_ml_ACDC]=sl_f0_model_ACDC(k,param,ThN,cnf_p_ACDC,func_f0)
-
 if cnf_p_ACDC.lut_flag
     switch cnf_p_ACDC.fitting_fun_type
         case 'lsq'
@@ -158,8 +157,6 @@ switch cnf_p_ACDC.fitting_fun_type
         [estimates,~,flag]     =   fminsearchbnd (fminfun,fit_params_ini,zeros(1,length(fit_params_ini)),...
                                                    cnf_p_ACDC.fitting_options_ACDC_lb,cnf_p_ACDC.fitting_options);
 end
-
-
 %% --------- DEFINE THE OUTPUT PARAMETERS ---------------------------------
 %--------------------------------------------------------------------------
 %---------- computation of the correlation coefficient --------------------
@@ -178,5 +175,6 @@ estimates(4) = correlation_fit(1,2)*100;
 
 %fitting flag
 estimates(5)=flag;
+
 end
 

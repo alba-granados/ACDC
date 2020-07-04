@@ -11,7 +11,7 @@
 % 
 % ----------------------------------------------------------
 % Author:    Eduard Makhoul  / isardSAT
-%            Roger Escolà / isardSAT
+%            Roger Escolï¿½ / isardSAT
 %            Albert Garcia / isardSAT
 % Reviewer:  Monica Roca   / isardSAT
 % Last rev.: Monica Roca   / isardSAT (02/06/2015)
@@ -56,6 +56,7 @@ end
 gk=(k-param(1))*param(2);
 waveform_ml_ACDC=0.*gk;
 if cnf_p_ACDC.lut_flag    
+    waveform_ml_ACDC(gk==0)=1.077900274770464; % 
     indexes_1=gk>=cnf_p_ACDC.LUT_ximin & gk<=cnf_p_ACDC.LUT_ximax;
     indexes_2=floor((gk(indexes_1)-cnf_p_ACDC.LUT_ximin)./cnf_p_ACDC.LUT_step)+1;
     indexes_3=gk>cnf_p_ACDC.LUT_ximax;

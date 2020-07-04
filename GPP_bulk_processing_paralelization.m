@@ -122,29 +122,32 @@ filesBulk.L1AFiles=filesBulk.inputFiles(filesBulk.indexFilesL1A);
 disp('Total number of L1A to be processed');
 disp(num2str(filesBulk.nFilesL1A))
 
-%---- Display the main processing configuration parameters ------
-CNF_file=[filesBulk.inputPath filesBulk.inputFiles(~cellfun(@isempty,strfind(aux,'cnf_file'))).name];
-CHD_file=[filesBulk.inputPath filesBulk.inputFiles(~cellfun(@isempty,strfind(aux,'chd_file'))).name];
-run(CHD_file);
-run(CNF_file);
-global hamming_window_cnf height_rate_application_cnf FAI_application_cnf CAL2_flag_cnf CAL1p2p_flag_cnf zp_fact_range_cnf
-global apply_stack_mask_cnf avoid_beams_mask_allzeros_cnf avoid_noisy_beams_cnf method_noise_est_cnf param_std_noise_thres_cnf noise_estimation_window
-disp('------------ Main processing configuration parameters -------------')
-disp(strcat('height_rate_application_cnf: ',num2str(height_rate_application_cnf)));
-disp(strcat('FAI_application_cnf: ',num2str(FAI_application_cnf)));
-disp(strcat('CAL2_flag_cnf: ',num2str(CAL2_flag_cnf)));
-disp(strcat('CAL1p2p_flag_cnf: ',num2str(CAL1p2p_flag_cnf)));
-disp(strcat('hamming_window_cnf: ',num2str(hamming_window_cnf)));
-disp(strcat('zp_fact_range_cnf: ',num2str(zp_fact_range_cnf)));
-disp(strcat('apply_stack_mask_cnf: ',num2str(apply_stack_mask_cnf)));
-disp(strcat('avoid_beams_mask_allzeros_cnf: ',num2str(avoid_beams_mask_allzeros_cnf)));
-disp(strcat('avoid_noisy_beams_cnf: ',num2str(avoid_noisy_beams_cnf)));
-if avoid_noisy_beams_cnf    
-    disp(strcat('method_noise_est_cnf: ',method_noise_est_cnf)); 
-    disp(strcat('param_std_noise_thres_cnf: ',num2str(param_std_noise_thres_cnf)));   
-    disp(strcat('noise_estimation_window: ',num2str(noise_estimation_window)));   
-end
-disp('-------------------------------------------------------------------')
+% %---- Display the main processing configuration parameters ------
+% CNF_file=[filesBulk.inputPath
+% filesBulk.inputFiles(~cellfun(@isempty,strfind(aux,'cnf_file'))).name]; %
+% alba: these paths are not correct. See ../config/ in
+% L1B_processing_ACDC_bis.m
+% CHD_file=[filesBulk.inputPath filesBulk.inputFiles(~cellfun(@isempty,strfind(aux,'chd_file'))).name];
+% run(CHD_file);
+% run(CNF_file);
+% global hamming_window_cnf height_rate_application_cnf FAI_application_cnf CAL2_flag_cnf CAL1p2p_flag_cnf zp_fact_range_cnf
+% global apply_stack_mask_cnf avoid_beams_mask_allzeros_cnf avoid_noisy_beams_cnf method_noise_est_cnf param_std_noise_thres_cnf noise_estimation_window
+% disp('------------ Main processing configuration parameters -------------')
+% disp(strcat('height_rate_application_cnf: ',num2str(height_rate_application_cnf)));
+% disp(strcat('FAI_application_cnf: ',num2str(FAI_application_cnf)));
+% disp(strcat('CAL2_flag_cnf: ',num2str(CAL2_flag_cnf)));
+% disp(strcat('CAL1p2p_flag_cnf: ',num2str(CAL1p2p_flag_cnf)));
+% disp(strcat('hamming_window_cnf: ',num2str(hamming_window_cnf)));
+% disp(strcat('zp_fact_range_cnf: ',num2str(zp_fact_range_cnf)));
+% disp(strcat('apply_stack_mask_cnf: ',num2str(apply_stack_mask_cnf)));
+% disp(strcat('avoid_beams_mask_allzeros_cnf: ',num2str(avoid_beams_mask_allzeros_cnf)));
+% disp(strcat('avoid_noisy_beams_cnf: ',num2str(avoid_noisy_beams_cnf)));
+% if avoid_noisy_beams_cnf    
+%     disp(strcat('method_noise_est_cnf: ',method_noise_est_cnf)); 
+%     disp(strcat('param_std_noise_thres_cnf: ',num2str(param_std_noise_thres_cnf)));   
+%     disp(strcat('noise_estimation_window: ',num2str(noise_estimation_window)));   
+% end
+% disp('-------------------------------------------------------------------')
 
 %% --------------- Run parallel processing --------------------------------
 if num_pools~=1

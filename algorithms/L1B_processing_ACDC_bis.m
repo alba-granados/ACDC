@@ -64,7 +64,7 @@ t6 = tic;
 % including all other files (cnf,cst,chd,....) not DBL nor HDR related to the specific
 % folder (in order no to change the functions)
 files.inputPath =filesBulk.inputPath;
-files.configPath=dir('../config/'); % why? I added this folder with cnf, cst, chd files
+files.configPath=dir('../config/'); % alba: why? I added this folder with cnf, cst, chd files
 files.configDir =('../config/');
 files.resultPath =filesBulk.resultPath;
 files.inputFiles =filesBulk.inputFiles(~(filesBulk.filterDATAFILES));
@@ -117,7 +117,10 @@ end
 L1B             = [];
 
 % i_burst=1;
-load(strcat(files.resultPath,'/data/up_to_i_surf96.mat'))
+% load(strcat(files.resultPath,'/data/up_to_i_surf96.mat'))
+% load(strcat(files.resultPath,'/data/up_to_i_surf_stacked61_i_surf157.mat'))
+% load(strcat(files.resultPath,'/data/up_to_i_surf_stacked16_i_surf111.mat'))
+load(strcat(files.resultPath,'/data/up_to_i_surf_stacked1_i_surf97.mat'))
 [steps,meteo,files,first_burst,final_burst] = read_inputs(files);
 
 N_bursts_original=N_bursts;
@@ -181,9 +184,7 @@ while(i_burst<=N_bursts)
             end
         end
         
-%         i_surf = 96;
         fprintf('i_surf=%d\n', i_surf)
-%         load(strcat(files.resultPath,'/data/up_to_i_surf96.mat'))
         if(i_surf > 64) %  > SAR Ku pulses in burst (number of surface location that are “observed” by the satellite at the current satellite burst position)
             if(i_burst_focussed==1)% handle final bursts
                 burst_margin = i_burst;
@@ -195,10 +196,12 @@ while(i_burst<=N_bursts)
             i_burst_focussed = i_burst_focussed+1;
             
             fprintf('L1A_buffer(i_burst_focussed-1).surf_loc_index(1)=%d\n', L1A_buffer(i_burst_focussed-1).surf_loc_index(1))
-            fprintf('i_burst_focussed=%d\n', i_burst_focussed)
             fprintf('i_surf_stacked=%d\n', i_surf_stacked)
+            fprintf('i_burst_focussed=%d\n', i_burst_focussed)
             if(L1A_buffer(i_burst_focussed-1).surf_loc_index(1)~=i_surf_stacked)
-%                 save(strcat(files.resultPath,'/data/up_to_i_surf96_2.mat'));
+%                 if i_surf_stacked == 16 
+%                     save(strcat(files.resultPath,'/data/up_to_i_surf_stacked', num2str(i_surf_stacked),'_', 'i_surf',num2str(i_surf),'.mat')); 
+%                 end
                 fprintf('stacking, geometry corrections, range transformation, stack masking...\n')
                 %             if(i_burst_focussed > (N_bursts_cycle_chd*N_ku_pulses_burst_chd))
                 %progressbar([],[],[],i_surf_stacked/N_bursts/zp_fact_azimut_cnf*N_bursts_cycle_chd);
@@ -216,7 +219,6 @@ while(i_burst<=N_bursts)
                     break;
                 end
                 fprintf('step(3) L1BS to L1B processing...\n')
-                disp('filesid in L1B_processing'); disp(files.fid)
                 fprintf('Multi-looking...\n')
                 [L1BS_buffer(i_surf_stacked),L1B]   = multilooking          (L1BS_buffer(i_surf_stacked));
                 if include_wfms_aligned
@@ -347,7 +349,7 @@ while(i_burst<=N_bursts)
                 end
                 %[L1BS_buffer(i_surf_stacked)] = empty_L1BS_struct(L1BS_buffer(i_surf_stacked));
                 i_surf_stacked = i_surf_stacked +1;
-                if(i_surf_stacked>N_surfs_loc_estimated)
+                if(i_surf_stacked > N_surfs_loc_estimated)
                     disp('exit process');
                     exit_gpp=1;
                     break;

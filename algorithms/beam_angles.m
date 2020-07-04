@@ -80,7 +80,7 @@ function [L1A]       = beam_angles (L1A,L1BS,N_total_surf_loc,i_surf)
 
         i_surf = i_surf + 1;
 
-    end
+        end
     L1A.beam_ang_nadir_index = 0;
 
     %order within stack to be used in the future

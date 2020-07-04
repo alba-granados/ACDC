@@ -11,7 +11,7 @@
 % 
 % ----------------------------------------------------------
 % Author:    Eduard Makhoul  / isardSAT
-%            Roger Escolà / isardSAT
+%            Roger Escolï¿½ / isardSAT
 %            Albert Garcia / isardSAT
 % Reviewer:  Monica Roca   / isardSAT
 % Last rev.: Monica Roca   / isardSAT (02/06/2015)
@@ -59,6 +59,7 @@ end
 flag_exit=0;
 global N_samples zp_fact_range_cnf
 
+
 %% -------------------- FIRST LEVEL FITTING ACDC STACK --------------------
 %--------------------------------------------------------------------------
 % Re-order the AC stack
@@ -93,14 +94,11 @@ end
 %% -------------------- FITTING OF THE MULTILOOKED ACDC -------------------
 %--------------------------------------------------------------------------
 [estimates,ml_wav_fitted]=fit_sl_f0_model_ACDC(waveform_ml_ACDC,k_ml_ACDC,nf_p,cnf_p_ACDC,[fit_params_ini(4),fit_params_ini(2),1.0],look_index_ref,i_surf_stacked,func_f0);
-
 %differential error of the epoch
 estimates(6)=estimates(1);
 
 %epoch: add the estimated error over the initial epoch
 estimates(1)=estimates(1)+fit_params_ini(1);
-
-
 
 %----------- re-organize the waveforms (may not be original size)----------
 dumm=waveform_ml_ACDC;
