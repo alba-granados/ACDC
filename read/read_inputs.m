@@ -229,8 +229,8 @@ end
                 case {'S3_','S3'}
                     
                     if (mask_flag)
-                        product_mask  = kml2lla(strcat(files.configDir,files.filename_kml.name));
-                        %product_mask  = kml2lla(files.filename_kml);
+%                         product_mask  = kml2lla(strcat(files.configDir,files.filename_kml.name));
+                        product_mask  = kml2lla(files.filename_kml);
                         [lat,lon,alt,range_delay] = readnetCDF_Sentinel3_lat_lon(files.filename_L1A);
                         alt_surf= alt - range_delay;
                         index_inside = find(inpolygon(lon,lat,product_mask.coord(:,1),product_mask.coord(:,2))); % records inside the given mask
@@ -251,12 +251,14 @@ end
                             final_burst = ((max(index_inside)+N_ku_pulses_burst_chd*N_bursts_cycle_chd));
                             if(isempty(strfind(files.filename_L1A,'measurement_l1a_reduced')))
                                 [files] = create_NetCDF_L1A_S3(files,final_burst-first_burst);
-                                resize_NetCDF_L1A_S3(files.filename_L1A,first_burst, final_burst-first_burst);
-                                movefile('./results/data/measurement_l1a_reduced.nc','./inputs/');
+                                resize_NetCDF_L1A_S3(files.filename_L1A,first_burst, final_burst-first_burst, files); % alba: added , files
+%                                 movefile('./results/data/measurement_l1a_reduced.nc','./inputs/');
+                                movefile(strcat(strcat(files.resultPath,'data/'),'measurement_l1a_reduced.nc'),files.inputPath) % alba
                                 %movefile(files.filename_L1A,'./results/data/');
                                 final_burst=final_burst-first_burst;
                                 first_burst=1;
-                                files.filename_L1A='./inputs/measurement_l1a_reduced.nc';
+%                                 files.filename_L1A='./inputs/measurement_l1a_reduced.nc';
+                                files.filename_L1A=strcat(files.inputPath,'measurement_l1a_reduced.nc');
                                 
                             end
 						end

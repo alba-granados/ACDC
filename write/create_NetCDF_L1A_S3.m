@@ -59,7 +59,9 @@ switch mission
                                 'isd','.nc');
     case {'S6_'} 
 end
-ncid = netcdf.create('./results/data/measurement_l1a_reduced.nc','CLOBBER');
+% ncid = netcdf.create('./results/data/measurement_l1a_reduced.nc','CLOBBER');
+ncid = netcdf.create(strcat(strcat(files.resultPath,'data/'),'measurement_l1a_reduced.nc'),'CLOBBER');
+
 
 long_name_att = 'long_name';
 std_name_att = 'standard_name';

@@ -31,11 +31,12 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% NetCDF utils
-function resize_NetCDF_L1A_S3(filename,start, count)
+function resize_NetCDF_L1A_S3(filename,start, count, files) % alba
 
 global N_samples 
 
-ncid = netcdf.open('./results/data/measurement_l1a_reduced.nc','WRITE');
+% ncid = netcdf.open('./results/data/measurement_l1a_reduced.nc','WRITE');
+ncid = netcdf.open(strcat(strcat(files.resultPath,'data/'),'measurement_l1a_reduced.nc'),'WRITE'); % alba
 ncid_L1A_big = netcdf.open(filename,'NOWRITE');
 
 
