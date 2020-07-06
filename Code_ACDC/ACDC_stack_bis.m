@@ -456,6 +456,8 @@ if cnf_p_ACDC.initial_param_fit_feedback_flag
         fit_params_ini_ACDC(2) = L1B.ACDC.Hs;
         fit_params_ini_ACDC(1) = L1B.ACDC.SSH;
     end
+    
+    disp('inACDC_stack_bis: updated fit_params_ini_ACDC'); disp(fit_params_ini_ACDC)
 end
 
 %------------------- verbose ----------------------------------------------
@@ -538,7 +540,7 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
     %savefig(f1,[file_name,'.fig'])%
     print('-dpng ','-r0',[file_name,'.png']);
     close(f1);
-    
+    fprintf('plots saved.\n')
 end
 
 end %end of function

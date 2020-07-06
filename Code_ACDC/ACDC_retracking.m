@@ -90,7 +90,8 @@ switch lower(cnf_p_ACDC.weighting_win_type)
         error('No valid weighting function')    
 end
 
-
+% disp('commnet plot in acdcretracking....')
+% plot(waveform_ml_ACDC);
 %% -------------------- FITTING OF THE MULTILOOKED ACDC -------------------
 %--------------------------------------------------------------------------
 [estimates,ml_wav_fitted]=fit_sl_f0_model_ACDC(waveform_ml_ACDC,k_ml_ACDC,nf_p,cnf_p_ACDC,[fit_params_ini(4),fit_params_ini(2),1.0],look_index_ref,i_surf_stacked,func_f0);
@@ -108,9 +109,13 @@ ml_wav_fitted=ones(1,N_samples*zp_fact_range_cnf)*NaN;
 dumm3=k_ml_ACDC;
 k_ml_ACDC=ones(1,N_samples*zp_fact_range_cnf)*NaN;
 if N_samples_ACDC > N_samples*zp_fact_range_cnf
-   waveform_ml_ACDC=dumm(1:N_samples*zp_fact_range_cnf);
-   ml_wav_fitted=dumm2(1:N_samples*zp_fact_range_cnf);
-   k_ml_ACDC=dumm3(1:N_samples*zp_fact_range_cnf);
+%    waveform_ml_ACDC=dumm(1:N_samples*zp_fact_range_cnf);
+%    ml_wav_fitted=dumm2(1:N_samples*zp_fact_range_cnf);
+%    k_ml_ACDC=dumm3(1:N_samples*zp_fact_range_cnf);
+    interp_pos = ceil(linspace(1,length(dumm), N_samples*zp_fact_range_cnf));
+    waveform_ml_ACDC = dumm(interp_pos);
+    ml_wav_fitted=dumm2(interp_pos);
+    k_ml_ACDC=dumm3(interp_pos);
 else
    waveform_ml_ACDC(1:N_samples_ACDC)=dumm(1:N_samples_ACDC);
    ml_wav_fitted(1:N_samples_ACDC)=dumm2(1:N_samples_ACDC);
