@@ -74,6 +74,7 @@ if cnf_p_ACDC.pre_processing
     %used to estimate the initial value of the epoch 
     %& eventually if desired the noise floor
     [peak_pow,idx_max_peak]=max(fit_data);
+%     plot(fit_data);
     idx_leading_edge=find(find(fit_data<=cnf_p_ACDC.percent_leading_edge/100.0*peak_pow)<idx_max_peak, 1, 'last' );
     if isempty(idx_leading_edge)
         %if there is no leading edge or the waveform has displaced that
@@ -149,14 +150,25 @@ end
 % -------------------------------------------------------------------------
 % --------- RUN THE MINIMIZATION/FITTING PROCEDURE ------------------------
 % -------------------------------------------------------------------------
+% disp('input of lsqcurvefit:');
+% disp(fit_params_ini)
+% figure(); plot(fit_data);
+
+bound = sqrt(2 * nf_p.alphag_a * nf_p.alphag_r/(nf_p.alphag_a + nf_p.alphag_r * 4 * (nf_p.Lx/nf_p.Ly)^4 * look_index_ref.^2));
+cnf_p_ACDC.fitting_options_ACDC_lb(2) = -bound;
+cnf_p_ACDC.fitting_options_ACDC_ub(2) = bound;
 switch cnf_p_ACDC.fitting_fun_type
     case 'lsq'
         [estimates,~,~,flag]     =   lsqcurvefit (mpfun,fit_params_ini,k,fit_data,...
-                                                   cnf_p_ACDC.fitting_options_ACDC_lb,cnf_p_ACDC.fitting_options_ub,cnf_p_ACDC.fitting_options);
+                                                   cnf_p_ACDC.fitting_options_ACDC_lb,cnf_p_ACDC.fitting_options_ACDC_ub,cnf_p_ACDC.fitting_options);
     case 'fmin'
         [estimates,~,flag]     =   fminsearchbnd (fminfun,fit_params_ini,zeros(1,length(fit_params_ini)),...
                                                    cnf_p_ACDC.fitting_options_ACDC_lb,cnf_p_ACDC.fitting_options);
 end
+% disp('output of lsqcurvefit:')
+% disp(estimates)
+% disp('() > 0?:');
+% disp(nf_p.Lz^2/(2 * nf_p.alphag_a * nf_p.alphag_r)*(2*nf_p.alphag_a*nf_p.alphag_r./(estimates(2)^2)-nf_p.alphag_a-nf_p.alphag_r * 4 * (nf_p.Lx/nf_p.Ly)^4 * look_index_ref.^2));
 %% --------- DEFINE THE OUTPUT PARAMETERS ---------------------------------
 %--------------------------------------------------------------------------
 %---------- computation of the correlation coefficient --------------------
