@@ -7,7 +7,7 @@ function stack = stack_gen(x, l, fit_p, nf_p, cnf_p,func_f0,func_f1)%varargin)
 % 
 % Author:           Eduard Makhoul / isardSAT
 %
-% Reviewer:         Mònica Roca / isardSAT
+% Reviewer:         Mï¿½nica Roca / isardSAT
 %
 % Last revision:    Eduard Makhoul / isardSAT V9 07/07/2016
 % This software is built with internal funding 
@@ -95,11 +95,19 @@ function stack = stack_gen(x, l, fit_p, nf_p, cnf_p,func_f0,func_f1)%varargin)
     Bkl=2.0*exp(-nf_p.alphax *(xl-nf_p.xp).^2-alpha_sigma * xl.^2-nf_p.alphay * nf_p.yp^2-(nf_p.alphay + alpha_sigma).*(yk).^2).*cosh(2*nf_p.alphay*nf_p.yp*yk);
     %Bkl=2.0*exp(-nf_p.alphax *(xl-nf_p.xp).^2-alpha_sigma * xl.^2-(alpha_sigma).*(yk).^2);
     
+%     % Linear Term
+% %     Tkl(k~=0)=(nf_p.Ly./abs(sqrt(k(k~=0)))).*(nf_p.alphay*nf_p.yp).*tanh(2*nf_p.alphay*nf_p.yp*yk(k~=0))-...
+% %                 (nf_p.alphay + alpha_sigma)*nf_p.Ly^2;
+%     %small angle approximation for 0
+%     Tkl=nf_p.Ly^2.*(nf_p.alphay*nf_p.yp)^2*2-(nf_p.alphay + alpha_sigma)*nf_p.Ly^2;
+
+    % alba: modification based in conventional retracker master code:
     % Linear Term
-%     Tkl(k~=0)=(nf_p.Ly./abs(sqrt(k(k~=0)))).*(nf_p.alphay*nf_p.yp).*tanh(2*nf_p.alphay*nf_p.yp*yk(k~=0))-...
-%                 (nf_p.alphay + alpha_sigma)*nf_p.Ly^2;
-    %small angle approximation for 0
-    Tkl=nf_p.Ly^2.*(nf_p.alphay*nf_p.yp)^2*2-(nf_p.alphay + alpha_sigma)*nf_p.Ly^2;
+    Tkl=(nf_p.Ly./abs(sqrt(k))).*(nf_p.alphay*nf_p.yp).*tanh(2*nf_p.alphay*nf_p.yp*yk)-...
+        (nf_p.alphay + alpha_sigma)*nf_p.Ly^2;
+    % small angle approximation for 0
+    Tkl(k<=0)=nf_p.Ly^2.*(nf_p.alphay*nf_p.yp)^2*2-(nf_p.alphay + alpha_sigma)*nf_p.Ly^2;
+    
     
     %**********************************************************************
     %************************ Dilation functions **************************
@@ -145,7 +153,7 @@ function stack = stack_gen(x, l, fit_p, nf_p, cnf_p,func_f0,func_f1)%varargin)
         case 'simple'
             stack         =   sqrt(g).*Bkl.*funcf0;
         case 'complete'
-            stack         =   sqrt(g).*Bkl.*(funcf0+Tkl.*g.*((sigmaz/nf_p.Lz)^2).*funcf1);
+            stack         =   sqrt(g).*Bkl.*(funcf0+Tkl.*g.*((sigmaz/nf_p.Lz)^2).*funcf1);  %  alba: see stack_gen.m conventional retracker master code: */bw_ku_chd; *(nf_p.fs_clock/chd_p.bw_rx_ku_chd), but typically ~1
     end
        
 end
