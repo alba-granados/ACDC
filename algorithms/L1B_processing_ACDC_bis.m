@@ -91,6 +91,8 @@ i_burst_focussed    = 1;
 i_surf_stacked      = 1;
 % previous_gap_flag   = 0; % indicates that the burst has a gap unable to be fullfilled
 %% Read inputs
+L2_data = readL2_S3_ESA(strcat('/media/alba/DATA/isardSAT/coding/data/CCI_sea_state/L2_ESA/S3A_SR_2_WAT____20191113T203044_20191113T211527_20191209T122108_2683_051_256______MAR_O_NT_003/', 'standard_measurement.nc'));
+
 [steps,meteo,files,first_burst,final_burst] = read_inputs(files);
 
 N_bursts    = final_burst-first_burst+1;
@@ -117,11 +119,9 @@ end
 L1B             = [];
 
 % i_burst=1;
-% load(strcat(files.resultPath,'/data/up_to_i_surf96.mat'))
-% load(strcat(files.resultPath,'/data/up_to_i_surf_stacked61_i_surf157.mat'))
-% load(strcat(files.resultPath,'/data/up_to_i_surf_stacked16_i_surf111.mat'))
-load(strcat(files.resultPath,'/data/up_to_i_surf_stacked1_i_surf97.mat'))
-[steps,meteo,files,first_burst,final_burst] = read_inputs(files);
+% load(strcat(files.resultPath,'/data/up_to_i_surf_stacked_2200.mat'))
+% load('/media/alba/DATA/isardSAT/coding/output/CCI_sea_state/ACDC/S3A_SR_1_SRA_A__20191113T202500_20191113T211528_20191209T114804_3027_051_256______MAR_O_NT_003/data_boxcar_g0_constraints/up_to_i_surf_stacked_2400.mat');
+% [steps,meteo,files,first_burst,final_burst] = read_inputs(files);
 
 N_bursts_original=N_bursts;
 fprintf('N_bursts=%d\n', N_bursts_original)
@@ -170,6 +170,8 @@ while(i_burst<=N_bursts)
     
     if(steps(2))
         fprintf('Step(2) L1A to L1BS processing...\n')
+        disp('size L1BS_buffer:')
+        disp(size(L1BS_buffer))
         fprintf('Computing surface locations...\n')
         [L1BS_buffer, out_surf] = surface_locations (L1A_buffer,L1BS_buffer, i_burst, i_surf);
         if(i_surf < out_surf)
@@ -199,8 +201,9 @@ while(i_burst<=N_bursts)
             fprintf('i_surf_stacked=%d\n', i_surf_stacked)
             fprintf('i_burst_focussed=%d\n', i_burst_focussed)
             if(L1A_buffer(i_burst_focussed-1).surf_loc_index(1)~=i_surf_stacked)
-%                 if i_surf_stacked == 16 
-%                     save(strcat(files.resultPath,'/data/up_to_i_surf_stacked', num2str(i_surf_stacked),'_', 'i_surf',num2str(i_surf),'.mat')); 
+%                 if mod(i_surf_stacked, 200) == 0
+%                     save(strcat(files.resultPath,'/data/up_to_i_surf_stacked_', num2str(i_surf_stacked),'.mat'), '-v7.3'); 
+% %                     save(strcat(files.resultPath,'/data/up_to_i_surf_stacked_', num2str(i_surf_stacked),'_L1BS', '.mat'), 'L1BS_buffer')
 %                 end
                 fprintf('stacking, geometry corrections, range transformation, stack masking...\n')
                 %             if(i_burst_focussed > (N_bursts_cycle_chd*N_ku_pulses_burst_chd))
@@ -324,6 +327,69 @@ while(i_burst<=N_bursts)
                     Hs_ACDC(i_surf_stacked)=L1B.ACDC.Hs;
                     SSH_preliminary_ACDC(i_surf_stacked)=L1B.ACDC.SSH_conv;
                     SSH_ACDC(i_surf_stacked)=L1B.ACDC.SSH;
+                    
+%                     f1=figure('NumberTitle','off','Name','SWH fitting');     
+%                     plot([L1BS_buffer(i_surf_stacked-length(geo_param_buffer_ACDC)+1:i_surf_stacked).lat_surf], [geo_param_buffer_ACDC.Hs], '.k');
+%                     ylim([0 6]);
+%                     set(gca, 'Xdir','reverse')
+%                     xlabel('Latitude [deg]'); ylabel('Significant Wave Height [m]'); 
+%                     legend('ACDC fitting'); 
+%                     title('SWH estimates');
+%                     file_name=[files.resultPath,'plots/','measurement_l1a_','SWH_ACDC'];
+%                     print('-dpng ','-r0',[file_name,'.png']);
+%                     close(f1);
+                    
+%                     first_lat = L1BS_buffer(i_surf_stacked-length(geo_param_buffer_ACDC)+1).lat_surf;
+%                     last_lat = L1BS_buffer(i_surf_stacked).lat_surf;
+%                     data.GR.analytical_SWH.SWH
+%                     find(data.GEO.LAT >= first_lat & data.GEO.LAT <last_lat)
+
+                    first_lat = L1BS_buffer(i_surf_stacked-length(geo_param_buffer_ACDC)+1).lat_surf; % -59.8;
+                    last_lat = L1BS_buffer(i_surf_stacked).lat_surf; % -57.1;
+                    Hs_all_ACDC = [geo_param_buffer_ACDC.Hs];
+                    Hs_all_conv = [geo_param_buffer_conv.Hs];
+                    Hs_all_ESA = L2_data.GR.analytical_SWH.SWH(find(L2_data.GEO.LAT >= first_lat & L2_data.GEO.LAT <=last_lat)); 
+
+                    f1=figure('NumberTitle','off','Name','SWH std fitting');   
+                    plot(L2_data.GEO.LAT(find(L2_data.GEO.LAT >= first_lat & L2_data.GEO.LAT <=last_lat)),Hs_all_ESA, 'k^', 'MarkerSize',5, 'MarkerFaceColor', 'k');
+                    hold on;
+                    plot([L1BS_buffer(i_surf_stacked-length(geo_param_buffer_ACDC)+1:i_surf_stacked).lat_surf], Hs_all_ACDC, '.r');
+                    plot([L1BS_buffer(i_surf_stacked-length(geo_param_buffer_ACDC)+1:i_surf_stacked).lat_surf], Hs_all_conv, '.', 'LineStyle', 'none', 'Color', [0.5 0.5 0.5]);
+                    ylim([0 6.5]);
+                    set(gca, 'Xdir','reverse')
+                    xlabel('Latitude [deg]'); ylabel('Significant Wave Height [m]'); 
+                    legend('L2 ESA', 'ACDC retracker','conventional retracker', 'Location', 'southwest'); 
+                    title('SWH estimates');
+                    file_name=[files.resultPath,'plots/','measurement_l1a_','SWH'];
+                    print('-dpng ','-r0',[file_name,'.png']);
+                    close(f1);
+                    
+                    Hs_reduced_steps=0.5:0.4:5;
+                    Hs_reduced_steps_ESA = 0.5:0.6:4.5;
+                    Hs_reduced_std_ACDC = zeros(1,length(Hs_reduced_steps)-1);
+                    Hs_reduced_std_conv = Hs_reduced_std_ACDC;
+                    Hs_reduced_std_ESA = zeros(1,length(Hs_reduced_steps_ESA)-1);
+                    Hs_all_ESA = L2_data.GR.analytical_SWH.SWH(find(L2_data.GEO.LAT >= first_lat & L2_data.GEO.LAT <=-40)); 
+                    for iter=1:length(Hs_reduced_steps)-1
+                        Hs_reduced_std_ACDC(iter)=nanstd(Hs_all_ACDC(find(Hs_reduced_steps(iter)<Hs_all_ACDC & Hs_all_ACDC<=Hs_reduced_steps(iter+1))));
+                        Hs_reduced_std_conv(iter)=nanstd(Hs_all_conv(find(Hs_reduced_steps(iter)<Hs_all_conv & Hs_all_conv<=Hs_reduced_steps(iter+1))));
+                        if iter<length(Hs_reduced_steps_ESA)
+                            Hs_reduced_std_ESA(iter)=nanstd(Hs_all_ESA(find(Hs_reduced_steps_ESA(iter)<Hs_all_ESA & Hs_all_ESA<=Hs_reduced_steps_ESA(iter+1))));
+                        end
+                    end
+                    f1=figure('NumberTitle','off','Name','SWH std fitting');   
+                    plot(Hs_reduced_steps_ESA(1:end-1), 100*Hs_reduced_std_ESA,'k^', 'MarkerFaceColor','k');
+                    hold on;
+                    plot(Hs_reduced_steps(1:end-1), 100*Hs_reduced_std_ACDC,'rv', 'MarkerFaceColor','r')
+                    plot(Hs_reduced_steps(1:end-1), 100*Hs_reduced_std_conv,'o', 'MarkerFaceColor',[0.5 0.5 0.5]);
+%                     ylim([0 25]);
+                    xlabel('Mean Significant Wave Height [m]'); ylabel('Mean Std. of Significant Wave Height [cm]'); 
+                    legend('L2 ESA', 'ACDC retracker','conventional retracker'); 
+                    title('std. Significant Wave Height');
+                    file_name=[files.resultPath,'plots/','measurement_l1a_','stdSWH'];
+                    print('-dpng ','-r0',[file_name,'.png']);
+                    close(f1);
+                   
                 end
                 
                 %% Writting routines
@@ -360,6 +426,7 @@ while(i_burst<=N_bursts)
         
     end
     i_burst=i_burst+1;
+        
 end
 
 last_burst=i_burst_focussed;
