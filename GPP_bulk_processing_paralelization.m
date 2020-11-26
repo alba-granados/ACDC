@@ -63,9 +63,9 @@ folders=strcat('./',folders(~strcmp(folders,['.'])&~strcmp(folders,['..'])&~strc
 for i_folder=1:length(folders)
     addpath(genpath(char(folders(i_folder))));
 end
-if(sum(options.plotting_flag)>0)
-    set_default_plot;
-end
+% if(sum(options.plotting_flag)>0)
+%     set_default_plot;
+% end
 %% --------- Define Paths -------------------------------------------------
 %fixing '/' '\'
 if(strfind(input_path, '/'))
