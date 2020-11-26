@@ -210,7 +210,7 @@ switch mission
     case {'S3_','S3A','S3B'}
                 %altimeter sensor name
         altimeter_sensor_name='SRAL '; 
-        %gnss sensor name
+%         %gnss sensor name
 %         if isempty(files.sph.gnss_info) 
 %             gnss_sensor_name='Not available';
 %         else 
@@ -1028,34 +1028,32 @@ netcdf.putAtt(ncid,id_aux,'creation_time',date_creation);
 netcdf.putAtt(ncid,id_aux,'Conventions',netcdf_v4_format);
 netcdf.putAtt(ncid,id_aux,'mission_name',mission);
 netcdf.putAtt(ncid,id_aux,'altimeter_sensor_name',altimeter_sensor_name);
-disp('innn')
-netcdf.putAtt(ncid,id_aux,'gnss_sensor_name',gnss_sensor_name);
-disp('innn')
-netcdf.putAtt(ncid,id_aux,'doris_sensor_name',doris_sensor_name);
-netcdf.putAtt(ncid,id_aux,'acq_station_name',acq_station_name);
-netcdf.putAtt(ncid,id_aux,'doris_sensor_name',acq_station_name);
-netcdf.putAtt(ncid,id_aux,'first_meas_time',first_meas_time);
-netcdf.putAtt(ncid,id_aux,'last_meas_time',last_meas_time);
-netcdf.putAtt(ncid,id_aux,'xref_altimeter_level0',xref_altimeter_level0);
-netcdf.putAtt(ncid,id_aux,'xref_altimeter_orbit',xref_altimeter_orbit);
-netcdf.putAtt(ncid,id_aux,'xref_doris_USO',xref_doris_USO);
-netcdf.putAtt(ncid,id_aux,'xref_altimeter_ltm_sar_cal1',xref_altimeter_ltm_sar_cal1);
-netcdf.putAtt(ncid,id_aux,'xref_altimeter_ltm_ku_cal2',xref_altimeter_ltm_ku_cal2);
-netcdf.putAtt(ncid,id_aux,'xref_altimeter_ltm_c_cal2',xref_altimeter_ltm_c_cal2);
-netcdf.putAtt(ncid,id_aux,'xref_altimeter_characterisation',xref_altimeter_characterisation);
+% netcdf.putAtt(ncid,id_aux,'gnss_sensor_name',gnss_sensor_name);
+% netcdf.putAtt(ncid,id_aux,'doris_sensor_name',doris_sensor_name);
+% netcdf.putAtt(ncid,id_aux,'acq_station_name',acq_station_name);
+% netcdf.putAtt(ncid,id_aux,'doris_sensor_name',acq_station_name);
+% netcdf.putAtt(ncid,id_aux,'first_meas_time',first_meas_time);
+% netcdf.putAtt(ncid,id_aux,'last_meas_time',last_meas_time);
+% netcdf.putAtt(ncid,id_aux,'xref_altimeter_level0',xref_altimeter_level0);
+% netcdf.putAtt(ncid,id_aux,'xref_altimeter_orbit',xref_altimeter_orbit);
+% netcdf.putAtt(ncid,id_aux,'xref_doris_USO',xref_doris_USO);
+% netcdf.putAtt(ncid,id_aux,'xref_altimeter_ltm_sar_cal1',xref_altimeter_ltm_sar_cal1);
+% netcdf.putAtt(ncid,id_aux,'xref_altimeter_ltm_ku_cal2',xref_altimeter_ltm_ku_cal2);
+% netcdf.putAtt(ncid,id_aux,'xref_altimeter_ltm_c_cal2',xref_altimeter_ltm_c_cal2);
+% netcdf.putAtt(ncid,id_aux,'xref_altimeter_characterisation',xref_altimeter_characterisation);
 netcdf.putAtt(ncid,id_aux,'semi_major_ellipsoid_axis',semi_major_ellipsoid_axis);
 netcdf.putAtt(ncid,id_aux,'ellipsoid_flattening',ellipsoid_flattening);
-%--------------- add the attributes related to intermediate product--------
-netcdf.putAtt(ncid,id_aux,'orbit_phase_code',orbit_phase_code);
-netcdf.putAtt(ncid,id_aux,'orbit_cycle_num',orbit_cycle_num);
-netcdf.putAtt(ncid,id_aux,'orbit_REL_Orbit',orbit_REL_Orbit);
-netcdf.putAtt(ncid,id_aux,'orbit_ABS_Orbit_Start',orbit_ABS_Orbit_Start);
-netcdf.putAtt(ncid,id_aux,'orbit_Rel_Time_ASC_Node_Start',orbit_Rel_Time_ASC_Node_Start);
-netcdf.putAtt(ncid,id_aux,'orbit_ABS_Orbit_Stop',orbit_ABS_Orbit_Stop);
-netcdf.putAtt(ncid,id_aux,'orbit_Rel_Time_ASC_Node_Stop',orbit_Rel_Time_ASC_Node_Stop);
-netcdf.putAtt(ncid,id_aux,'orbit_Equator_Cross_Time',orbit_Equator_Cross_Time);
-netcdf.putAtt(ncid,id_aux,'orbit_Equator_Cross_Long',orbit_Equator_Cross_Long);
-netcdf.putAtt(ncid,id_aux,'orbit_Ascending_Flag',orbit_Ascending_Flag);
+% %--------------- add the attributes related to intermediate product--------
+% netcdf.putAtt(ncid,id_aux,'orbit_phase_code',orbit_phase_code);
+% netcdf.putAtt(ncid,id_aux,'orbit_cycle_num',orbit_cycle_num);
+% netcdf.putAtt(ncid,id_aux,'orbit_REL_Orbit',orbit_REL_Orbit);
+% netcdf.putAtt(ncid,id_aux,'orbit_ABS_Orbit_Start',orbit_ABS_Orbit_Start);
+% netcdf.putAtt(ncid,id_aux,'orbit_Rel_Time_ASC_Node_Start',orbit_Rel_Time_ASC_Node_Start);
+% netcdf.putAtt(ncid,id_aux,'orbit_ABS_Orbit_Stop',orbit_ABS_Orbit_Stop);
+% netcdf.putAtt(ncid,id_aux,'orbit_Rel_Time_ASC_Node_Stop',orbit_Rel_Time_ASC_Node_Stop);
+% netcdf.putAtt(ncid,id_aux,'orbit_Equator_Cross_Time',orbit_Equator_Cross_Time);
+% netcdf.putAtt(ncid,id_aux,'orbit_Equator_Cross_Long',orbit_Equator_Cross_Long);
+% netcdf.putAtt(ncid,id_aux,'orbit_Ascending_Flag',orbit_Ascending_Flag);
 
 netcdf.endDef(ncid);
 
