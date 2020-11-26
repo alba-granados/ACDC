@@ -60,7 +60,7 @@ function [L1B,geo_param_buffer_conv,geo_param_buffer_ACDC,fit_params_ini_conv,fi
                                                                                                    geo_param_buffer_conv,geo_param_buffer_ACDC,fit_params_ini_conv,fit_params_ini_ACDC,...
                                                                                                    accumulated_sigmaz_conv,accumulated_SWH_ACDC,accumulated_SSH_ACDC,i_surf_fitted,...
                                                                                                    func_f0,func_f1,files)
-                                                                                               
+                                                                      
 disp(strcat('ACDC on surf #',{' '},num2str(i_surf_stacked)));                                                                                                                                                                                       
 global cnf_p_ACDC
 global apply_stack_mask_cnf
@@ -93,7 +93,7 @@ end
 %% ----------------- INITIZALIZATION OF VARIABLES -------------------------
 %--------------------------------------------------------------------------
 %load in a structure of non fitting parameters
-fprintf('generating non-fitting parameteters...\n')
+fprintf('generating non-fitting parameters...\n')
 nf_p=gen_nonfit_params_ACDC(L1BS,L1B);
 
 % ---------------- Stack + mask -------------------------------------------
@@ -341,7 +341,6 @@ end
 
 
 
-
 %% --------------- UPDATING THE INITIAL_PARAMS ----------------------------
 %--------------------------------------------------------------------------
 if cnf_p_ACDC.initial_param_fit_feedback_flag
@@ -457,7 +456,6 @@ if cnf_p_ACDC.initial_param_fit_feedback_flag
         fit_params_ini_ACDC(1) = L1B.ACDC.SSH;
     end
     
-    disp('inACDC_stack_bis: updated fit_params_ini_ACDC'); disp(fit_params_ini_ACDC)
 end
 
 %------------------- verbose ----------------------------------------------
@@ -471,7 +469,9 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
                 filename=strcat(filename,file_ext_string);
             end
         case {'S3_','S3'}
-            filename = strcat('measurement_l1a_', num2str(i_surf_stacked)); % files.xfdumanifest 
+            dirs=split(files.filename_L1A,'/');
+            fname=split(dirs(end),'.nc');
+            filename = char(fname(1));
     end
     max_image=max([max(10*log10(stack_before_SRC(:))),max(10*log10(stack(:))),max(10*log10(stack_ac(:)))]);
     f1=figure('NumberTitle','off','Name','Comparison Stack before and after ACDC');
@@ -495,7 +495,7 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
     surfc(k,l,10*log10(stack_ac),'LineStyle','none','FaceColor','flat');
     title('Stack after AC'); xlabel('Range index'); ylabel('Doppler index');
     colormap('jet'); c=colorbar; ylabel(c,'[dB]'); caxis([max_image-40.0, max_image]); view(2); grid off;
-    
+        
     subplot(2,2,4);
     surfc(k_scaled,l,10*log10(stack_ac),'LineStyle','none','FaceColor','flat');
     title('Stack after ACDC'); xlabel('Range index'); ylabel('Doppler index');
@@ -524,8 +524,8 @@ if cnf_p_ACDC.plot_fits_flag && ((mod(i_surf_stacked,cnf_p_ACDC.plot_fits_downsa
     close(f1);
     
     f1=figure('NumberTitle','off','Name','ACDC Retracker fitting');        
-    plot(k_ml_ACDC,L1B.ACDC.waveform/max(L1B.ACDC.waveform),'-b'); 
-    hold on; plot(k_ml_ACDC,L1B.ACDC.ml_wav_fitted_ACDC,'-r');
+    plot(k_ml_ACDC,L1B.ACDC.waveform/max(L1B.ACDC.waveform),'.k'); 
+    hold on; plot(k_ml_ACDC,L1B.ACDC.ml_wav_fitted_ACDC,'-k');
     ylim([0 1]);
     xlabel('Range index'); ylabel('Norm. amplitude'); 
     legend('ACDC waveform','ACDC fitting'); 
