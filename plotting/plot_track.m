@@ -3,7 +3,7 @@ global mask_flag
     
     WaterColor = [143 226 255]/255;
     degrees=max(lat)-min(lat);
-    axes(options.axes)
+%     axes(options.axes)
 %     options.axes=axesm('MapProjection','lambert','MapLatLimit',[min(lat) max(lat)], 'MapLonLimit',[min(lon)-degrees/2 max(lon)+degrees/2]);
     options.axes = worldmap([min(lat) max(lat)],[min(lon)-degrees/2 max(lon)+degrees/2]);
     npoints = 4;
