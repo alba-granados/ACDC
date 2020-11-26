@@ -74,7 +74,7 @@ k_scaled_1D=k_scaled_1D(idx_finite);
 %[estimates,ml_wav_fitted]=fit_sl_f0_model_ACDC(stack_1D,k_scaled_1D,nf_p,cnf_p_ACDC,[0,fit_params_ini(2),1.0],look_index_ref,i_surf_stacked,func_f0);
 
 
-%% -------------------- MULTILOOKING OF THE ACDC --------------------------
+    %% -------------------- MULTILOOKING OF THE ACDC --------------------------
 %--------------------------------------------------------------------------
 kmin = floor(min(k_scaled_1D));
 kmax = floor(max(k_scaled_1D));
@@ -86,18 +86,25 @@ switch lower(cnf_p_ACDC.weighting_win_type)
         matrix_weighting=matrix_weighting./(matrix_weighting*ones(N_samples_stack_1D,1)*ones(1,N_samples_stack_1D));
         %waveform_ml_ACDC=((ones(N_samples_ACDC,1)*stack_1D)*matrix_weighting.').';
         waveform_ml_ACDC=(matrix_weighting*(stack_1D.')).';
+    case 'rectangular'
+        N_samples_ACDC = N_samples*zp_fact_range_cnf;
+        k_ml_ACDC = linspace(kmin, kmax, N_samples_ACDC);
+        [k_scaled_1D_increasing, indx_order] = sort(k_scaled_1D); % sort k_scaled in increasing order
+        waveform_ml_ACDC = zeros(1, N_samples_ACDC);
+        stack_1D_increasing = stack_1D(indx_order);
+        for ii=1:N_samples_ACDC-1
+            stack_1D_sample = stack_1D_increasing(k_scaled_1D_increasing>=k_ml_ACDC(ii) & k_scaled_1D_increasing<k_ml_ACDC(ii+1));
+            waveform_ml_ACDC(ii) = nanmean(stack_1D_sample); %(stack_1D_sample>0));
+        end
     otherwise
         error('No valid weighting function')    
 end
 
-% disp('commnet plot in acdcretracking....')
-% plot(waveform_ml_ACDC);
 %% -------------------- FITTING OF THE MULTILOOKED ACDC -------------------
 %--------------------------------------------------------------------------
 [estimates,ml_wav_fitted]=fit_sl_f0_model_ACDC(waveform_ml_ACDC,k_ml_ACDC,nf_p,cnf_p_ACDC,[fit_params_ini(4),fit_params_ini(2),1.0],look_index_ref,i_surf_stacked,func_f0);
 %differential error of the epoch
 estimates(6)=estimates(1);
-
 %epoch: add the estimated error over the initial epoch
 estimates(1)=estimates(1)+fit_params_ini(1);
 
